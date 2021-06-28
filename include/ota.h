@@ -1,7 +1,5 @@
 #pragma once
 
-#define OTA_URL "https://arduprog.eu/fw.bin"
-
 #define OTA_DEBUG               //uncomment to enable debug logging
 //#define ANTI_ROLLBACK       //uncomment to enable Secure ver check
 
@@ -22,7 +20,7 @@
     #include "esp_log.h"
 #endif
 
-typedef struct ota_cfg{
+typedef struct{
     char*           url;        //url where the fw image is located, e.g. https://bla.com/fw.bin
     const char*     CA_root;    //CA root cer, pem as string
     //uint8_t       auth_type;  //idk
