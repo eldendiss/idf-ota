@@ -26,9 +26,9 @@ esp_err_t img_header_val(esp_app_desc_t *new_fw){
 
     if(memcmp(new_fw->version, run_fw.version, sizeof(new_fw->version)) == 0) {     //if we've received same fw, do nothing
         #ifdef OTA_DEBUG
-            ESP_LOGW(DESC, "Current fw version == new fw version. Update aborted!");
+            ESP_LOGW(DESC, "Current fw version == new fw version. Update not needed!");
         #endif
-        return ESP_FAIL;
+        return ESP_ERR_NOT_SUPPORTED;
     }
 
     #ifdef ANTI_ROLLBACK
@@ -101,10 +101,13 @@ esp_err_t process_ota(ota_config_t* param){
 
 
     err = img_header_val(&new_fw_desc);
-    if(err != ESP_OK){                              //FW version/rollback protect. validation
+    if(err != ESP_OK){  
+        if(err!=ESP_ERR_NOT_SUPPORTED)                            //FW version/rollback protect. validation
+        {
         #ifdef OTA_DEBUG
             ESP_LOGE(DESC, "FW verification failed");
         #endif
+        }
         goto ota_end;                               //task failed - cleanup
     }
 
@@ -146,7 +149,7 @@ esp_err_t process_ota(ota_config_t* param){
 ota_end:
     //esp_https_ota_abort(https_ota_h);
     #ifdef OTA_DEBUG
-        ESP_LOGE(DESC, "OTA upgrade failed");                           //undefined error
+        ESP_LOGW(DESC, "OTA upgrade aborted");                           //undefined error
     #endif
     return ESP_FAIL;
 }
