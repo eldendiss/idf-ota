@@ -22,6 +22,11 @@ esp_err_t img_header_val(esp_app_desc_t *new_fw){
         #ifdef OTA_DEBUG
             ESP_LOGI(DESC, "Current fw version: %s",run_fw.version);                //debug output
         #endif
+    } else {
+        #ifdef OTA_DEBUG
+            ESP_LOGE(DESC, "FW version not available");                //debug output
+        #endif
+        return ESP_ERR_NOT_SUPPORTED;
     }
 
     if(memcmp(new_fw->version, run_fw.version, sizeof(new_fw->version)) == 0) {     //if we've received same fw, do nothing
@@ -57,6 +62,9 @@ esp_err_t http_client_init(esp_http_client_handle_t client,char* _jwt){
     return err;
 }*/
 
+static esp_err_t setHdr(esp_http_client_handle_t h){
+	return esp_http_client_set_header(h, "PRIVATE-TOKEN", "glpat-wqa82dLYn3iRJMN-TsFZ");
+}
 
 /* Main function for incoming OTA update handling
  * ARGS - ota_config_t struct - url and auth parameters
@@ -78,6 +86,7 @@ esp_err_t process_ota(ota_config_t* param){
 
     esp_https_ota_config_t ota_conf = {
         .http_config = &http_conf,          //pass parameters
+		.http_client_init_cb = setHdr,
     };
 
     esp_https_ota_handle_t https_ota_h = NULL;      //initialize handle for ota
