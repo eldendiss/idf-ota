@@ -28,13 +28,25 @@ esp_err_t img_header_val(esp_app_desc_t *new_fw){
         #endif
         return ESP_ERR_NOT_SUPPORTED;
     }
+    int newVersion[4];
+    sscanf(new_fw->version,"%d.%d.%d.%d",&newVersion[0],&newVersion[1],&newVersion[2],&newVersion[3]);
+    
+    int oldVersion[4];
+    sscanf(run_fw.version,"%d.%d.%d.%d",&oldVersion[0],&oldVersion[1],&oldVersion[2],&oldVersion[3]);
 
-    if(memcmp(new_fw->version, run_fw.version, sizeof(new_fw->version)) == 0) {     //if we've received same fw, do nothing
-        #ifdef OTA_DEBUG
-            ESP_LOGW(DESC, "Current fw version == new fw version. Update not needed!");
-        #endif
-        return ESP_ERR_NOT_SUPPORTED;
+    if(newVersion[0]<=oldVersion[0]){
+        if(newVersion[1]<=oldVersion[1]){
+            if(newVersion[2]<=oldVersion[2]){
+                if(newVersion[3]<=oldVersion[3]){
+                    #ifdef OTA_DEBUG
+                            ESP_LOGW(DESC, "Current fw version == new fw version. Update not needed!");
+                    #endif
+                    return ESP_ERR_NOT_SUPPORTED;
+                }   
+            }
+        }
     }
+    
 
     #ifdef ANTI_ROLLBACK
         const uint32_t hw_sec_ver = esp_efuse_read_secure_version();
